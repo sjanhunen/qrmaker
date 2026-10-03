@@ -4,9 +4,16 @@ import "./style.css";
 
 const QUIET_ZONE_MODULES = 4;
 const ERROR_CORRECTION = "Q";
+const MIN_SIZE = 128;
+const MAX_SIZE = 1024;
+const SIZE_STEP = 16;
 
 const preview = document.querySelector("#preview");
 const form = document.querySelector("#options");
+const sizeInput = document.querySelector("#size");
+const sizeReadout = document.querySelector("#size-readout");
+const sizeDecrease = document.querySelector("#size-decrease");
+const sizeIncrease = document.querySelector("#size-increase");
 
 function readOptions() {
   const data = new FormData(form);
@@ -73,8 +80,34 @@ function toQrOptions({ data, shape, foreground, background, size }) {
   };
 }
 
+function formatSize(size) {
+  return `${size} × ${size} px`;
+}
+
+function syncSizeControls(size) {
+  sizeReadout.textContent = formatSize(size);
+  sizeDecrease.disabled = size <= MIN_SIZE;
+  sizeIncrease.disabled = size >= MAX_SIZE;
+}
+
+function setSize(size) {
+  const next = Math.min(MAX_SIZE, Math.max(MIN_SIZE, size));
+  sizeInput.value = String(next);
+  syncSizeControls(next);
+  sizeInput.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+sizeDecrease.addEventListener("click", () => {
+  setSize(Number(sizeInput.value) - SIZE_STEP);
+});
+
+sizeIncrease.addEventListener("click", () => {
+  setSize(Number(sizeInput.value) + SIZE_STEP);
+});
+
 const initial = readOptions();
 let lastData = initial.data;
+syncSizeControls(initial.size);
 
 const qr = new QRCodeStyling(toQrOptions(initial));
 qr.append(preview);
@@ -83,7 +116,8 @@ form.addEventListener("input", () => {
   const options = readOptions();
   if (options.data) lastData = options.data;
   if (!lastData) return;
-  if (!Number.isInteger(options.size) || options.size < 128 || options.size > 1024) return;
+  if (!Number.isInteger(options.size) || options.size < MIN_SIZE || options.size > MAX_SIZE) return;
+  if ((options.size - MIN_SIZE) % SIZE_STEP !== 0) return;
 
   qr.update(toQrOptions({ ...options, data: lastData }));
 });

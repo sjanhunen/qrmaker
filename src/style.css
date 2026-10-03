@@ -46,10 +46,34 @@ fieldset label {
   gap: 0.4rem;
 }
 
-input[type="url"],
-input[type="number"] {
+input[type="url"] {
   font: inherit;
   padding: 0.4rem 0.5rem;
+}
+
+.size-control {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepper output {
+  min-width: 9.5rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.stepper button {
+  width: 2.25rem;
+}
+
+.stepper button:disabled {
+  opacity: 0.35;
 }
 
 .actions {

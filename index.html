@@ -44,18 +44,15 @@
           <input id="background" name="background" type="color" value="#ffffff" />
         </label>
 
-        <label>
-          Size
-          <input
-            id="size"
-            name="size"
-            type="number"
-            min="128"
-            max="1024"
-            step="16"
-            value="280"
-          />
-        </label>
+        <div class="size-control">
+          <span id="size-label">Size</span>
+          <div class="stepper" role="group" aria-labelledby="size-label">
+            <button type="button" id="size-decrease" aria-label="Decrease size">−</button>
+            <output id="size-readout" for="size">288 × 288 px</output>
+            <button type="button" id="size-increase" aria-label="Increase size">+</button>
+          </div>
+          <input type="hidden" id="size" name="size" value="288" />
+        </div>
 
         <div class="actions">
           <button type="button" id="download-svg">Download SVG</button>
