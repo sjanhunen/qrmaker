@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>qrmaker</title>
+  </head>
+  <body>
+    <main>
+      <h1>qrmaker</h1>
+
+      <form id="options">
+        <label>
+          URL
+          <input
+            id="url"
+            name="url"
+            type="url"
+            value="https://example.com"
+            autocomplete="off"
+            required
+          />
+        </label>
+
+        <fieldset>
+          <legend>Shape</legend>
+          <label>
+            <input type="radio" name="shape" value="square" checked />
+            Square
+          </label>
+          <label>
+            <input type="radio" name="shape" value="rounded" />
+            Rounded
+          </label>
+        </fieldset>
+
+        <label>
+          Foreground
+          <input id="foreground" name="foreground" type="color" value="#111111" />
+        </label>
+
+        <label>
+          Background
+          <input id="background" name="background" type="color" value="#ffffff" />
+        </label>
+
+        <label>
+          Size
+          <input
+            id="size"
+            name="size"
+            type="number"
+            min="128"
+            max="1024"
+            step="16"
+            value="280"
+          />
+        </label>
+
+        <div class="actions">
+          <button type="button" id="download-svg">Download SVG</button>
+          <button type="button" id="download-png">Download PNG</button>
+        </div>
+      </form>
+
+      <div id="preview" aria-label="QR code preview"></div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
