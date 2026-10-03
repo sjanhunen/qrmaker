@@ -14,6 +14,9 @@ const sizeInput = document.querySelector("#size");
 const sizeReadout = document.querySelector("#size-readout");
 const sizeDecrease = document.querySelector("#size-decrease");
 const sizeIncrease = document.querySelector("#size-increase");
+const downloadPng = document.querySelector("#download-png");
+const copyPng = document.querySelector("#copy-png");
+const exportStatus = document.querySelector("#export-status");
 
 function readOptions() {
   const data = new FormData(form);
@@ -112,7 +115,56 @@ syncSizeControls(initial.size);
 const qr = new QRCodeStyling(toQrOptions(initial));
 qr.append(preview);
 
+function pngBlob() {
+  const options = readOptions();
+  // A fresh instance: qr-code-styling keeps the first PNG canvas after later updates.
+  const code = new QRCodeStyling(toQrOptions({ ...options, data: options.data || lastData }));
+  return code.getRawData("png").then((raw) => {
+    if (!(raw instanceof Blob)) throw new Error("Could not render the QR code.");
+    return raw.type === "image/png" ? raw : new Blob([raw], { type: "image/png" });
+  });
+}
+
+let pngUrl;
+
+function savePng(blob) {
+  if (pngUrl) URL.revokeObjectURL(pngUrl);
+  pngUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = pngUrl;
+  link.download = "qr.png";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+window.addEventListener("pagehide", () => {
+  if (!pngUrl) return;
+  URL.revokeObjectURL(pngUrl);
+  pngUrl = "";
+});
+
+downloadPng.addEventListener("click", async () => {
+  try {
+    savePng(await pngBlob());
+    exportStatus.textContent = "Saved qr.png";
+  } catch {
+    exportStatus.textContent = "Download failed";
+  }
+});
+
+copyPng.addEventListener("click", async () => {
+  try {
+    // Pass the blob promise straight through so the write stays inside the click gesture.
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob() })]);
+    exportStatus.textContent = "Copied";
+  } catch {
+    exportStatus.textContent = "Copy failed";
+  }
+});
+
 form.addEventListener("input", () => {
+  exportStatus.textContent = "";
   const options = readOptions();
   if (options.data) lastData = options.data;
   if (!lastData) return;

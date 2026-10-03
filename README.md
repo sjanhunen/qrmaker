@@ -7,7 +7,7 @@ A small, browser-only QR code generator for URLs/links, with live preview and do
 - Generate QR codes from URLs
 - Customize shape (square or rounded), colors, and size
 - Live preview in the browser
-- Download as SVG and PNG
+- Download as PNG
 - Max portability: runs as a static page (hosted or opened locally)
 
 ## Scope (MVP)
@@ -20,7 +20,7 @@ A small, browser-only QR code generator for URLs/links, with live preview and do
 | Colors           | Foreground and background                       |
 | Dimensions       | Output size in pixels                           |
 | Live preview     | Updates as options change                       |
-| Download         | SVG and PNG                                     |
+| Download         | PNG                                             |
 | Delivery         | Static web app; optional single-file HTML build |
 
 
@@ -89,6 +89,6 @@ qrmaker/
 
 - Enter a URL → preview updates
 - Toggle square / rounded, colors, size → preview matches
-- Download SVG and PNG that scan correctly on a phone
+- Download a PNG that scans correctly on a phone
 - `npm run build` produces a single HTML file that works when opened locally
 
