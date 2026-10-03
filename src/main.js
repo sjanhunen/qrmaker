@@ -18,6 +18,13 @@ const downloadPng = document.querySelector("#download-png");
 const copyPng = document.querySelector("#copy-png");
 const exportStatus = document.querySelector("#export-status");
 
+function clampSize(size) {
+  if (!Number.isFinite(size)) return MIN_SIZE;
+  const bounded = Math.min(MAX_SIZE, Math.max(MIN_SIZE, size));
+  const steps = Math.round((bounded - MIN_SIZE) / SIZE_STEP);
+  return MIN_SIZE + steps * SIZE_STEP;
+}
+
 function readOptions() {
   const data = new FormData(form);
   return {
@@ -25,7 +32,7 @@ function readOptions() {
     shape: String(data.get("shape")),
     foreground: String(data.get("foreground")),
     background: String(data.get("background")),
-    size: Number(data.get("size")),
+    size: clampSize(Number(data.get("size"))),
   };
 }
 
@@ -94,10 +101,8 @@ function syncSizeControls(size) {
 }
 
 function setSize(size) {
-  const next = Math.min(MAX_SIZE, Math.max(MIN_SIZE, size));
-  sizeInput.value = String(next);
-  syncSizeControls(next);
-  sizeInput.dispatchEvent(new Event("input", { bubbles: true }));
+  sizeInput.value = String(size);
+  render();
 }
 
 sizeDecrease.addEventListener("click", () => {
@@ -108,12 +113,27 @@ sizeIncrease.addEventListener("click", () => {
   setSize(Number(sizeInput.value) + SIZE_STEP);
 });
 
-const initial = readOptions();
-let lastData = initial.data;
-syncSizeControls(initial.size);
+let lastData = "";
+let qr;
 
-const qr = new QRCodeStyling(toQrOptions(initial));
-qr.append(preview);
+function render() {
+  exportStatus.textContent = "";
+  const options = readOptions();
+  sizeInput.value = String(options.size);
+  syncSizeControls(options.size);
+  if (options.data) lastData = options.data;
+  if (!lastData) return;
+
+  const qrOptions = toQrOptions({ ...options, data: lastData });
+  if (!qr) {
+    qr = new QRCodeStyling(qrOptions);
+    qr.append(preview);
+    return;
+  }
+  qr.update(qrOptions);
+}
+
+render();
 
 function pngBlob() {
   const options = readOptions();
@@ -163,13 +183,4 @@ copyPng.addEventListener("click", async () => {
   }
 });
 
-form.addEventListener("input", () => {
-  exportStatus.textContent = "";
-  const options = readOptions();
-  if (options.data) lastData = options.data;
-  if (!lastData) return;
-  if (!Number.isInteger(options.size) || options.size < MIN_SIZE || options.size > MAX_SIZE) return;
-  if ((options.size - MIN_SIZE) % SIZE_STEP !== 0) return;
-
-  qr.update(toQrOptions({ ...options, data: lastData }));
-});
+form.addEventListener("input", render);
