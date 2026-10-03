@@ -1,5 +1,9 @@
 import QRCodeStyling from "qr-code-styling";
+import qrcode from "qrcode-generator";
 import "./style.css";
+
+const QUIET_ZONE_MODULES = 4;
+const ERROR_CORRECTION = "Q";
 
 const preview = document.querySelector("#preview");
 const form = document.querySelector("#options");
@@ -15,6 +19,31 @@ function readOptions() {
   };
 }
 
+function encodingMode(data) {
+  if (/^[0-9]*$/.test(data)) return "Numeric";
+  if (/^[0-9A-Z $%*+\-./:]*$/.test(data)) return "Alphanumeric";
+  return "Byte";
+}
+
+function moduleCount(data) {
+  const code = qrcode(0, ERROR_CORRECTION);
+  code.addData(data, encodingMode(data));
+  code.make();
+  return code.getModuleCount();
+}
+
+// qr-code-styling's margin is pixels, and it floors each module to a whole pixel.
+// Pick a margin that leaves at least four modules of background on every side.
+function quietZoneMargin(size, count) {
+  const dotSize = Math.max(1, Math.floor(size / (count + QUIET_ZONE_MODULES * 2)));
+  const maxMargin = Math.floor((size - dotSize * count) / 2);
+  if (maxMargin <= 0) return 0;
+
+  const minMargin = Math.max(0, Math.floor((size - (dotSize + 1) * count) / 2) + 1);
+  const preferred = QUIET_ZONE_MODULES * dotSize;
+  return Math.min(maxMargin, Math.max(preferred, minMargin));
+}
+
 function toQrOptions({ data, shape, foreground, background, size }) {
   const rounded = shape === "rounded";
 
@@ -23,9 +52,14 @@ function toQrOptions({ data, shape, foreground, background, size }) {
     height: size,
     type: "svg",
     data,
+    margin: quietZoneMargin(size, moduleCount(data)),
+    qrOptions: {
+      errorCorrectionLevel: ERROR_CORRECTION,
+    },
     dotsOptions: {
       type: rounded ? "extra-rounded" : "square",
       color: foreground,
+      roundSize: true,
     },
     cornersSquareOptions: {
       type: rounded ? "extra-rounded" : "square",
