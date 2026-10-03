@@ -16,14 +16,22 @@ function readOptions() {
 }
 
 function toQrOptions({ data, shape, foreground, background, size }) {
+  const rounded = shape === "rounded";
+
   return {
     width: size,
     height: size,
     type: "svg",
     data,
     dotsOptions: {
-      type: shape,
+      type: rounded ? "extra-rounded" : "square",
       color: foreground,
+    },
+    cornersSquareOptions: {
+      type: rounded ? "extra-rounded" : "square",
+    },
+    cornersDotOptions: {
+      type: rounded ? "dot" : "square",
     },
     backgroundOptions: {
       color: background,
